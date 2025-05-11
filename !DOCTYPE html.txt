@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>곤충 혐오 실험</title>
+  <script src="https://unpkg.com/jspsych@7.3.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-button-response"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-slider-response"></script>
+  <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" />
+</head>
+<body></body>
+<script>
+  const jsPsych = initJsPsych({
+    on_finish: () => jsPsych.data.displayData()
+  });
+
+  const timeline = [];
+
+  // Set A: 사전 혐오도 평가 (곤충 종류별 이미지 1장)
+  const setA_images = [
+    {label: "바퀴벌레", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Periplaneta_americana.jpg/640px-Periplaneta_americana.jpg"},
+    {label: "거미", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/European_garden_spider_2008.jpg/640px-European_garden_spider_2008.jpg"},
+    {label: "구더기", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Maggots.jpg/640px-Maggots.jpg"},
+    {label: "파리", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Housefly.jpg/640px-Housefly.jpg"},
+    {label: "개미", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Ant_UK.jpg/640px-Ant_UK.jpg"}
+  ];
+
+  for (let i = 0; i < setA_images.length; i++) {
+    timeline.push({
+      type: jsPsychImageButtonResponse,
+      stimulus: setA_images[i].image,
+      choices: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+      prompt: `<p><strong>${setA_images[i].label}</strong> 사진을 보고 느낀 혐오 수준을 1~10 중 선택하세요 (10 = 매우 혐오).</p>`,
+      data: { phase: "survey", insect: setA_images[i].label }
+    });
+  }
+
+  // Set B: 본 실험용 이미지 (바퀴벌레로 예시, 3장만 시범)
+  const setB_images = [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cockroach_close-up.jpg/640px-Cockroach_close-up.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Cockroach_kitchen.jpg/640px-Cockroach_kitchen.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/American_cockroach.jpg/640px-American_cockroach.jpg"
+  ];
+
+  for (let i = 0; i < setB_images.length; i++) {
+    // 공포 자극 보여주기 + 시간 측정
+    timeline.push({
+      type: jsPsychImageButtonResponse,
+      stimulus: setB_images[i],
+      choices: ["다음"],
+      prompt: "사진을 충분히 본 후 '다음'을 누르세요.",
+      data: { phase: "experiment", trial_num: i+1, image: setB_images[i] }
+    });
+
+    // 보상 자극 (실험군 조건 가정)
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Cute-dog.jpg/640px-Cute-dog.jpg" width="400"><p>잘하셨어요! 귀여운 보상 이미지입니다 🐶</p>',
+      choices: ["계속"]
+    });
+
+    // 혐오도 다시 평가
+    timeline.push({
+      type: jsPsychHtmlSliderResponse,
+      stimulus: "<p>이 사진에 대해 지금 느낀 혐오 수준을 다시 평가해주세요 (1~10).</p>",
+      labels: ["1", "10"],
+      min: 1,
+      max: 10,
+      step: 1,
+      data: { phase: "rating_after", image: setB_images[i] }
+    });
+  }
+
+  jsPsych.run(timeline);
+</script>
+</html>
